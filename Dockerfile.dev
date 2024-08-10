@@ -1,0 +1,45 @@
+# Use an official Node.js runtime as a parent image
+FROM node:20-slim
+
+# Install build tools
+RUN apt-get update && apt-get install -y python3 make g++ && rm -rf /var/lib/apt/lists/*
+
+# Create and set a non-root user for better security
+RUN groupadd -r appgroup && useradd -r -g appgroup appuser
+
+# Set the working directory
+WORKDIR /app
+
+# Copy package.json and package-lock.json (if available)
+COPY package*.json ./
+
+# Set HOME environment variable to /app to avoid permission issues
+ENV HOME=/app
+
+# Switch to root user to set permissions
+USER root
+
+# Ensure correct permissions for the /app directory
+RUN chown -R appuser:appgroup /app
+
+# Switch to non-root user to install dependencies
+USER appuser
+
+# Install dependencies including dev dependencies
+RUN npm install
+
+# Copy the rest of the application code
+COPY --chown=appuser:appgroup . .
+
+# Ensure the output directory exists and adjust permissions
+RUN mkdir -p dist && chown -R appuser:appgroup /app
+
+# Switch back to non-root user
+USER appuser
+
+# Expose the port the app runs on
+EXPOSE 1234
+
+# Define the command to run the application
+CMD ["npm", "start", "--", "--no-cache"]
+

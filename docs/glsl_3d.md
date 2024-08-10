@@ -21,6 +21,11 @@ Project structure
 
 install `gl-matrix`
 
+Note: may need
+
+-   clean .parcel-cache, dist, node_modules, package-lock.json
+-   after `npm start`, automatically generate `@parcel/transformer-glsl` in package.json
+
 ```
 npm i gl-matrix 
 ```
